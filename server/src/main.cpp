@@ -149,6 +149,35 @@ int main() {
 		}
 	});
 
+	server.Post("/remove", [](const httplib::Request &req, httplib::Response &res) {
+		std::cout << "POST Request: " << req.path << std::endl;
+		try {
+			auto body_json = json::parse(req.body);
+			if (body_json.contains("password") && body_json["password"] == global_password) {
+				if (body_json.contains("id")) {
+					int id = body_json["id"].get<int>();
+					if (id >= 0 && id < wishes.size()) {
+						wishes.erase(wishes.begin() + id);
+						save_wishes();
+						res.set_content(R"({"Message": "Wish removed successfully"})", "application/json");
+					} else {
+						res.status = 400;
+						res.set_content(R"({"error": "Invalid wish ID"})", "application/json");
+					}
+				} else {
+					res.status = 400;
+					res.set_content(R"({"error": "Missing wish ID"})", "application/json");
+				}
+			} else {
+				res.status = 401;
+				res.set_content(R"({"error": "Unauthorized"})", "application/json");
+			}
+		} catch (const json::parse_error&) {
+			res.status = 400;
+			res.set_content(R"({"error": "Bad Request"})", "application/json");
+		}
+	});
+
 	server.Post(".*", [](const httplib::Request &req, httplib::Response &res) {
 		res.status = 404;
 		res.set_content(R"({"error": "Not Found"})", "application/json");
@@ -160,8 +189,8 @@ int main() {
 		res.set_content(response_json.dump(), "application/json");
 	});
 
-	std::cout << "Starting server on port 8080..." << std::endl;
-	server.listen("0.0.0.0", 8080);
+	std::cout << "Starting server on port 5479..." << std::endl;
+	server.listen("0.0.0.0", 5479);
 
 	return 0;
 }

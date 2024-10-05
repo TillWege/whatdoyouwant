@@ -56,7 +56,9 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(json)
 
 # Add the source files
-add_executable(wdywclient src/main.cpp)
+add_executable(wdywclient src/main.cpp
+        src/stuff.h
+        src/stuff.cpp)
 
 target_include_directories(wdywclient PRIVATE ${raygui_SOURCE_DIR}/src)
 
