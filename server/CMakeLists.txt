@@ -14,8 +14,16 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(httplib)
 
+FetchContent_Declare(
+        json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG "master"
+        GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(json)
+
 # Add executable
 add_executable(wdywserver src/main.cpp)
 
 # Link httplib to the target
-target_link_libraries(wdywserver PRIVATE httplib::httplib pthread)
+target_link_libraries(wdywserver PRIVATE httplib::httplib nlohmann_json::nlohmann_json)
