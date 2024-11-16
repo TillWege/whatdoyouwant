@@ -42,7 +42,7 @@ endif()
 FetchContent_Declare(
     httplib
     GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
-    GIT_TAG "master"
+    GIT_TAG "5c1a34e766817cf0865ca8bc5af5edeb0f9b2df4"
     GIT_PROGRESS TRUE
 )
 FetchContent_MakeAvailable(httplib)
