@@ -37,65 +37,76 @@ void loginScreen()
 
 char wish[256] = {0};
 
+int scrollOffset = 0;
 void drawListScreen()
 {
-    DrawTexture(image, 50, 50, WHITE);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 40);
-    DrawText("Add a Wish", 100, 550, 40, GRAY);
+	DrawTexture(image, 50, 50, WHITE);
+	GuiSetStyle(DEFAULT, TEXT_SIZE, 40);
+	DrawText("Add a Wish", 100, 550, 40, GRAY);
 
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
+	GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
+	GuiTextBox({100, 650, 300, 50}, wish, 20, true);
 
-    GuiTextBox({100, 650, 300, 50}, wish, 20, true);
-
-    if (GuiButton({100, 750, 300, 50}, "Add Wish"))
-    {
+	if (GuiButton({100, 750, 300, 50}, "Add Wish"))
+	{
 		std::string w = wish;
-        addWish(w);
-        loadWishes(wishes);
-        memset(wish, 0, sizeof(wish));
-    }
+		addWish(w);
+		loadWishes(wishes);
+		memset(wish, 0, sizeof(wish));
+	}
 
-    bool needsUpdate = false;
+	int itemCount = wishes.size();
+	int visibleItems = (screenHeight - 200) / 50;
 
-    for(int i = 0; i < wishes.size(); i++)
-    {
-        auto state = GuiGetState();
+	if (itemCount > visibleItems)
+	{
+		int width = GetScreenWidth();
+		scrollOffset = GuiScrollBar({float(width - 100), 100, 20, screenHeight - 200}, scrollOffset, 0, itemCount - visibleItems);
+	}
 
-        if(GuiButton({600, float(100 + i * 50), 30, 30}, "X"))
-        {
-            removeWish(i);
-            needsUpdate = true;
-        }
+	for (int i = 0; i < itemCount; i++)
+	{
+		if (i < scrollOffset || i >= scrollOffset + visibleItems) continue;
 
-        if(i == 0)
-            GuiSetState(STATE_DISABLED);
+		auto state = GuiGetState();
 
-        if (GuiButton({650, float(100 + i * 50), 30, 30}, "+"))
-        {
-            moveWish(i, UP);
-            needsUpdate = true;
-        }
-        GuiSetState(state);
+		if (GuiButton({600, float(100 + (i - scrollOffset) * 50), 30, 30}, "X"))
+		{
+			removeWish(i);
+			loadWishes(wishes);
+			itemCount--;
+			continue;
+		}
 
-        if (i + 1 == wishes.size())
-            GuiSetState(STATE_DISABLED);
+		if (i == 0)
+			GuiSetState(STATE_DISABLED);
 
-        if(GuiButton({700, float(100 + i * 50), 30, 30}, "-"))
-        {
-            moveWish(i, DOWN);
-            needsUpdate = true;
-        }
+		if (GuiButton({650, float(100 + (i - scrollOffset) * 50), 30, 30}, "+"))
+		{
+			moveWish(i, UP);
+			loadWishes(wishes);
+		}
+		GuiSetState(state);
 
-        GuiSetState(state);
+		if (i + 1 == wishes.size())
+			GuiSetState(STATE_DISABLED);
 
-        DrawText(wishes[i].c_str(), 750, 100 + i * 50, 30, GRAY);
-    }
-    if(needsUpdate)
-        loadWishes(wishes);
+		if (GuiButton({700, float(100 + (i - scrollOffset) * 50), 30, 30}, "-"))
+		{
+			moveWish(i, DOWN);
+			loadWishes(wishes);
+		}
+
+		GuiSetState(state);
+		DrawText(wishes[i].c_str(), 750, 100 + (i - scrollOffset) * 50, 30, GRAY);
+	}
 }
+
+
 
 int main() {
     // Initialize the window
+	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(screenWidth, screenHeight, "Raylib Window Example");
 
     // httplib::Client cli("http://localhost:8080");
